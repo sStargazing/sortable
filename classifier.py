@@ -3,10 +3,19 @@ import os
 
 from dotenv import load_dotenv
 from groq import Groq
+import re
 
 load_dotenv()
 
-_client = Groq(api_key=os.environ["GROQ_API_KEY"])
+api_key=os.getenv("GROQ_API_KEY")
+
+if not api_key:
+    raise RuntimeError(
+        "Missing GROQ_API_KEY. Add it to your .env file or export it in Terminal."
+    )
+
+_client=Groq(api_key=api_key)
+
 MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 
 EXISTING_PROMPT = """Available categories: {folders}
@@ -25,6 +34,12 @@ Examples of bad matching: a cat photo does NOT belong in "Development Environmen
 
 Reply with ONLY the category label. No explanation, no punctuation, nothing else."""
 
+
+def clean_label(label: str) -> str:
+    label=label.strip()
+    label=re.sub(r"[^\w\s-]", "", label)
+    label=re.sub(r"\s+", " ", label)
+    return label[:40]
 
 def classify(image_path: str, folders: list[str], mode: str) -> str:
     folder_list = ", ".join(folders) if folders else "(none)"
@@ -51,4 +66,5 @@ def classify(image_path: str, folders: list[str], mode: str) -> str:
             }
         ],
     )
-    return response.choices[0].message.content.strip()
+    result=response.choices[0].message.content.strip()
+    return clean_label(result)

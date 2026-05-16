@@ -25,7 +25,7 @@ def _wait_for_stable(path: str) -> bool:
 
 
 class ScreenshotHandler(FileSystemEventHandler):
-    EXTENSIONS = {".png", ".jpg"}
+    EXTENSIONS={".png", ".jpg", ".jpeg", ".heic"}
 
     def __init__(self, on_screenshot):
         self._on_screenshot = on_screenshot

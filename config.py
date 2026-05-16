@@ -19,6 +19,9 @@ def load() -> dict:
 
 
 def save(cfg: dict) -> None:
+    if "folders" in cfg:
+        cfg["folders"]=clean_folders(cfg["folders"])
+
     with open(CONFIG_PATH, "w") as f:
         json.dump(cfg, f, indent=2)
 
@@ -28,3 +31,11 @@ def increment_sorted_count() -> int:
     cfg["sorted_count"] += 1
     save(cfg)
     return cfg["sorted_count"]
+
+def clean_folders(folders: list[str]) -> list[str]:
+    cleaned=[]
+    for folder in folders:
+        folder=folder.strip()
+        if folder and folder not in cleaned:
+            cleaned.append(folder)
+    return cleaned

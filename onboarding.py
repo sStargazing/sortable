@@ -82,7 +82,10 @@ def run() -> bool:
             folder = _pick_folder("Add a folder", "Add")
             if not folder:
                 break
-            folders.append(folder.split("/")[-1])
+            folders.append({
+                "name": os.path.basename(folder),
+                "path": folder
+            })
         if not folders:
             _alert("No folders selected", "You must select at least one folder.", "OK")
             return False
