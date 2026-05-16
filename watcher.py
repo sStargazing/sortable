@@ -29,21 +29,34 @@ class ScreenshotHandler(FileSystemEventHandler):
 
     def __init__(self, on_screenshot):
         self._on_screenshot = on_screenshot
+        self._seen = set()
+
+    def _handle(self, path: str) -> None:
+        name = os.path.basename(path)
+        if name in self._seen:
+            return
+        if name.startswith("."):
+            return
+        self._seen.add(name)
+        print(f"[watcher] detected: {path}", flush=True)
+        if os.path.splitext(path)[1].lower() not in self.EXTENSIONS:
+            return
+        if _wait_for_stable(path):
+            self._on_screenshot(path)
 
     def on_created(self, event):
-        if event.is_directory:
-            return
-        ext = os.path.splitext(event.src_path)[1].lower()
-        if ext not in self.EXTENSIONS:
-            return
-        if _wait_for_stable(event.src_path):
-            self._on_screenshot(event.src_path)
+        if not event.is_directory:
+            self._handle(event.src_path)
+
+    def on_moved(self, event):
+        if not event.is_directory:
+            self._handle(event.dest_path)
 
 
 def start(folder: str, on_screenshot) -> Observer:
-    """Start watching folder; calls on_screenshot(path) for each new image."""
     handler = ScreenshotHandler(on_screenshot)
     observer = Observer()
     observer.schedule(handler, folder, recursive=False)
     observer.start()
+    print(f"[watcher] watching: {folder}")
     return observer

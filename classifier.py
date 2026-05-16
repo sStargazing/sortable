@@ -2,28 +2,31 @@ import base64
 import os
 
 from dotenv import load_dotenv
-from openai import OpenAI
+from groq import Groq
 
 load_dotenv()
 
-_client = OpenAI(
-    api_key=os.environ["GEMINI_API_KEY"],
-    base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-)
-MODEL = "gemini-2.0-flash"
+_client = Groq(api_key=os.environ["GROQ_API_KEY"])
+MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 
-EXISTING_PROMPT = """Here are the available folders: {folders}.
-Look at this screenshot and return ONLY the folder name it belongs in.
-If nothing matches well, return "root"."""
+EXISTING_PROMPT = """Available categories: {folders}
 
-LLM_PROMPT = """Here are the existing folders: {folders}.
-Look at this screenshot. If it fits an existing folder well, return that folder name.
-If not, return a short, clean new folder name (2-3 words max).
-Return ONLY the folder name, nothing else."""
+Look at this screenshot. Reply with ONLY the single category it belongs in.
+If none fit, reply with exactly: root"""
+
+LLM_PROMPT = """Existing categories: {folders}
+
+Look at this screenshot. First identify what it shows, then:
+- If the content is semantically related to an existing category, use that category.
+- If no existing category fits the content at all, create a short descriptive label (2-3 words).
+
+Examples of good matching: a VSCode window belongs in "Development Environment", a cat photo belongs in "Cat Photos".
+Examples of bad matching: a cat photo does NOT belong in "Development Environment".
+
+Reply with ONLY the category label. No explanation, no punctuation, nothing else."""
 
 
 def classify(image_path: str, folders: list[str], mode: str) -> str:
-    """Return the folder name for the given screenshot."""
     folder_list = ", ".join(folders) if folders else "(none)"
     prompt = (EXISTING_PROMPT if mode == "existing" else LLM_PROMPT).format(
         folders=folder_list

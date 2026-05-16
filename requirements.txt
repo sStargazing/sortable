@@ -1,4 +1,4 @@
-openai
+groq
 watchdog
 python-dotenv
 rumps

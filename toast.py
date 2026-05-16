@@ -1,11 +1,17 @@
-import subprocess
+import rumps
 
 
 def show(folder_name: str) -> None:
-    """Display a macOS notification."""
-    title = "Sortable"
-    message = f"Saved to {folder_name}"
-    script = (
-        f'display notification "{message}" with title "{title}"'
+    rumps.notification(
+        title="Sortable",
+        subtitle="",
+        message=f"Saved to {folder_name}",
     )
-    subprocess.run(["osascript", "-e", script], check=False)
+
+
+def error(message: str) -> None:
+    rumps.notification(
+        title="Sortable",
+        subtitle="Something went wrong",
+        message=message,
+    )
