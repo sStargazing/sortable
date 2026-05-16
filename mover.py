@@ -22,7 +22,9 @@ def move(image_path: str, root_folder: str, folder_name: str) -> str:
     if folder_name=="root":
         dest_dir=root_folder
     else:
-        dest_dir=os.path.join(root_folder, folder_name)
+        dest_dir=os.path.normpath(
+            os.path.join(root_folder, folder_name)
+        )
 
     os.makedirs(dest_dir, exist_ok=True)
 

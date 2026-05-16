@@ -9,27 +9,70 @@ from menu_bar import SortableApp
 
 
 def get_folder_names(cfg):
-    if cfg["mode"]=="existing":
-        folders=[]
+    if cfg["mode"]!="existing":
+        names=[]
 
-        for item in os.listdir(cfg["root_folder"]):
-            path=os.path.join(cfg["root_folder"],item)
+        for folder in cfg["folders"]:
+            if isinstance(folder, dict):
+                names.append(folder["name"])
+            else:
+                names.append(folder)
 
-            if os.path.isdir(path) and not item.startswith("."):
-                folders.append(item)
+        return names
 
-        return folders
+    IGNORE_NAMES={
+        ".git",
+        "__pycache__",
+        "node_modules",
+        "Contents",
+        "Resources",
+        "Frameworks",
+        "MacOS",
+        "_CodeSignature",
+        "Versions",
+        "build",
+        "dist",
+        ".idea",
+        ".vscode"
+    }
 
-    names=[]
+    IGNORE_EXTENSIONS={
+        ".app",
+        ".framework",
+        ".xpc",
+        ".oesystemplugin"
+    }
 
-    for folder in cfg["folders"]:
-        if isinstance(folder, dict):
-            names.append(folder["name"])
-        else:
-            names.append(folder)
+    MAX_DEPTH=2
 
-    return names
+    folders=[]
 
+    root_depth=cfg["root_folder"].count(os.sep)
+
+    for root,dirs,_ in os.walk(cfg["root_folder"]):
+
+        depth=root.count(os.sep)-root_depth
+
+        if depth>=MAX_DEPTH:
+            dirs.clear()
+            continue
+
+        dirs[:]=[
+            d for d in dirs
+            if d not in IGNORE_NAMES
+            and not d.startswith(".")
+            and not any(d.endswith(ext) for ext in IGNORE_EXTENSIONS)
+        ]
+
+        for directory in dirs:
+            relative_path=os.path.relpath(
+                os.path.join(root,directory),
+                cfg["root_folder"]
+            )
+
+            folders.append(relative_path)
+
+    return sorted(folders)
 
 def handle_screenshot(path: str) -> None:
     try:

@@ -20,8 +20,15 @@ MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 
 EXISTING_PROMPT = """Available categories: {folders}
 
-Look at this screenshot. Reply with ONLY the single category it belongs in.
-If none fit, reply with exactly: root"""
+Look at this screenshot and choose the best matching category.
+
+Rules:
+- You MUST reply with one of the available categories exactly as written.
+- Some categories may be nested paths like dog/birds.
+- If the image clearly matches a nested category, reply with the full nested path.
+- If no category fits, reply with exactly: root.
+
+Reply with ONLY the category name. No explanation."""
 
 LLM_PROMPT = """Existing categories: {folders}
 
@@ -37,9 +44,17 @@ Reply with ONLY the category label. No explanation, no punctuation, nothing else
 
 def clean_label(label: str) -> str:
     label=label.strip()
-    label=re.sub(r"[^\w\s-]", "", label)
+
+    # Keep letters, numbers, spaces, hyphens, underscores, and folder slashes
+    label=re.sub(r"[^\w\s\-/]", "", label)
+
+    # Remove duplicate spaces
     label=re.sub(r"\s+", " ", label)
-    return label[:40]
+
+    # Remove accidental starting/ending slashes
+    label=label.strip("/")
+
+    return label[:80]
 
 def classify(image_path: str, folders: list[str], mode: str) -> str:
     folder_list = ", ".join(folders) if folders else "(none)"
