@@ -151,6 +151,8 @@ activemq-data/
 config.json
 
 # Environments
+.DS_Store
+.env
 .envrc
 .venv
 venv/
