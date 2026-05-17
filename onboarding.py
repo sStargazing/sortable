@@ -67,7 +67,7 @@ def run() -> bool:
     # Screen 2 — pick mode
     response = _alert(
         "How should folders be managed?",
-        "Use existing folders: you pick the folders, Sortable chooses the best match.\n\n"
+        "Use existing folders: Sortable sorts into folders already in your screenshot folder.\n\n"
         "LLM creates folders: Sortable names and creates folders automatically.",
         "Use existing folders",
         "LLM creates folders",
@@ -75,24 +75,9 @@ def run() -> bool:
     # 1000 = first button, 1001 = second button
     mode = "existing" if response == 1000 else "llm"
 
-    folders = []
-    if mode == "existing":
-        _alert("Select folders", "Next, select each folder you want to sort into. Press Cancel when done.", "OK")
-        while True:
-            folder = _pick_folder("Add a folder", "Add")
-            if not folder:
-                break
-            folders.append({
-                "name": os.path.basename(folder),
-                "path": folder
-            })
-        if not folders:
-            _alert("No folders selected", "You must select at least one folder.", "OK")
-            return False
-
     cfg = config.load()
     cfg["root_folder"] = root_folder
     cfg["mode"] = mode
-    cfg["folders"] = folders
+    cfg["folders"] = []
     config.save(cfg)
     return True
