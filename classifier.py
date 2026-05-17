@@ -1,20 +1,26 @@
 import base64
 import os
+import sys
+import re
 
 from dotenv import load_dotenv
 from groq import Groq
-import re
 
-load_dotenv()
+if getattr(sys, "frozen", False):
+    base_path = sys._MEIPASS
+else:
+    base_path = os.path.dirname(__file__)
 
-api_key=os.getenv("GROQ_API_KEY")
+load_dotenv(os.path.join(base_path, ".env"))
+
+api_key = os.getenv("GROQ_API_KEY")
 
 if not api_key:
     raise RuntimeError(
         "Missing GROQ_API_KEY. Add it to your .env file or export it in Terminal."
     )
 
-_client=Groq(api_key=api_key)
+_client = Groq(api_key=api_key)
 
 MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 
