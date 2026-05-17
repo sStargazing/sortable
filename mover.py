@@ -28,6 +28,9 @@ def move(image_path: str, root_folder: str, folder_name: str) -> str:
 
     os.makedirs(dest_dir, exist_ok=True)
 
+    if os.path.abspath(os.path.dirname(image_path)) == os.path.abspath(dest_dir):
+        return image_path
+
     dest=os.path.join(dest_dir, os.path.basename(image_path))
     dest=unique_path(dest)
 

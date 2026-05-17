@@ -5,6 +5,7 @@ import watcher
 import toast
 import mover
 import classifier
+import popup
 from menu_bar import SortableApp
 
 
@@ -90,6 +91,22 @@ def handle_screenshot(path: str) -> None:
             if folder_name not in folder_names and folder_name!="root":
                 print("[handle] invalid folder from AI, using root", flush=True)
                 folder_name="root"
+
+        dest_dir = (
+            cfg["root_folder"]
+            if folder_name == "root"
+            else os.path.join(cfg["root_folder"], folder_name)
+        )
+        is_new_folder = (
+            folder_name != "root"
+            and folder_name not in folder_names
+            and not os.path.exists(dest_dir)
+        )
+
+        cancelled = popup.show(folder_name, is_new_folder)
+        if cancelled:
+            print("[handle] cancelled — moving to root folder", flush=True)
+            folder_name = "root"
 
         mover.move(path, cfg["root_folder"], folder_name)
         print("[handle] moved", flush=True)
